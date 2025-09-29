@@ -106,14 +106,14 @@
 .conversion-result-text {
   margin: 2rem auto;
   padding: 1.5rem;
-  background: #b6b8b6;
+  background: #1e1f1e;
   color: white;
   border-radius: 12px;
   font-size: 1.6rem;
   font-weight: 700;
   text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 8px rgba(24, 23, 23, 0.3);
   max-width: 400px;
 }
 

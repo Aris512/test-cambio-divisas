@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
-
 function App() {
   // Estados para manejar las monedas y las selecciones
   const [currencies, setCurrencies] = useState<string[]>([])
   const [currencyRates, setCurrencyRates] = useState<{[key: string]: number}>({})
-  const [selectedCurrency1, setSelectedCurrency1] = useState<string>('')
-  const [selectedCurrency2, setSelectedCurrency2] = useState<string>('')
-  const [inputAmount, setInputAmount] = useState<number>(0)
-  const [conversionResult, setConversionResult] = useState<number>(0)
+  const [fromCurrency, setFromCurrency] = useState<string>('')
+  const [toCurrency, setToCurrency] = useState<string>('')
+  const [amount, setAmount] = useState<number>(0)
+  const [result, setResult] = useState<number>(0)
 
   // Función para obtener los datos de la API
   const fetchCurrencies = async () => {
@@ -22,16 +21,13 @@ function App() {
       
       const data = await response.json()
       
-
-      
       // Verificar que data.rates existe
       if (!data.rates) {
         throw new Error('No se encontró el objeto rates en la respuesta')
       }
       
       // Extraer los códigos de las monedas y sus valores
-      const currencyCodes = Object.keys(data.rates)
-      setCurrencies(currencyCodes)
+      setCurrencies(Object.keys(data.rates))
       setCurrencyRates(data.rates)
       
     } catch (err) {
@@ -47,13 +43,12 @@ function App() {
   // Calcular conversión automáticamente cuando cambien los valores
   useEffect(() => {
     calculateConversion()
-  }, [selectedCurrency1, selectedCurrency2, inputAmount, currencyRates])
-
+  }, [fromCurrency, toCurrency, amount, currencyRates])
 
   // Función para calcular la conversión de divisas
   const calculateConversion = () => {
-    if (!selectedCurrency1 || !selectedCurrency2 || inputAmount <= 0 || Object.keys(currencyRates).length === 0) {
-      setConversionResult(0)
+    if (!fromCurrency || !toCurrency || amount <= 0 || Object.keys(currencyRates).length === 0) {
+      setResult(0)
       return
     }
 
@@ -62,33 +57,27 @@ function App() {
     // 1. Convertir de moneda1 a USD: amount / rate1
     // 2. Convertir de USD a moneda2: (amount / rate1) * rate2
     
-    const rate1 = currencyRates[selectedCurrency1] // Valor de la moneda origen respecto a USD
-    const rate2 = currencyRates[selectedCurrency2] // Valor de la moneda destino respecto a USD
+    const fromRate = currencyRates[fromCurrency]
+    const toRate = currencyRates[toCurrency]
     
-    if (!rate1 || !rate2) {
-      setConversionResult(0)
+    if (!fromRate || !toRate) {
+      setResult(0)
       return
     }
     
-    const usdAmount = inputAmount / rate1 // Convertir a USD
-    const result = usdAmount * rate2 // Convertir de USD a moneda destino
+    const usdAmount = amount / fromRate // Convertir a USD
+    const convertedAmount = usdAmount * toRate // Convertir de USD a moneda destino
     
-    console.log(`Conversión: ${inputAmount} ${selectedCurrency1} = ${result.toFixed(2)} ${selectedCurrency2}`)
-    setConversionResult(result)
+    setResult(convertedAmount)
   }
 
-  // Manejar el cambio de selección del primer menú
-  const handleCurrency1Change = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedCurrency = event.target.value
-    console.log('Moneda seleccionada (1):', selectedCurrency)
-    setSelectedCurrency1(selectedCurrency)
+  // Manejar el cambio de selección de monedas
+  const handleFromCurrencyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setFromCurrency(event.target.value)
   }
 
-  // Manejar el cambio de selección del segundo menú
-  const handleCurrency2Change = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedCurrency = event.target.value
-    console.log('Moneda seleccionada (2):', selectedCurrency)
-    setSelectedCurrency2(selectedCurrency)
+  const handleToCurrencyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setToCurrency(event.target.value)
   }
 
   // Manejar el cambio del input de cantidad
@@ -97,7 +86,7 @@ function App() {
     
     // Si está vacío, establecer como 0
     if (inputValue === '') {
-      setInputAmount(0)
+      setAmount(0)
       return
     }
     
@@ -112,8 +101,7 @@ function App() {
       return
     }
     
-    console.log('Cantidad ingresada:', value)
-    setInputAmount(value)
+    setAmount(value)
   }
 
   return (
@@ -128,8 +116,8 @@ function App() {
             </label>
             <select 
               id="currency-select-1"
-              value={selectedCurrency1} 
-              onChange={handleCurrency1Change}
+              value={fromCurrency} 
+              onChange={handleFromCurrencyChange}
               className="currency-dropdown"
             >
               <option value="">-- Selecciona moneda origen --</option>
@@ -147,8 +135,8 @@ function App() {
             </label>
             <select 
               id="currency-select-2"
-              value={selectedCurrency2} 
-              onChange={handleCurrency2Change}
+              value={toCurrency} 
+              onChange={handleToCurrencyChange}
               className="currency-dropdown"
             >
               <option value="">-- Selecciona moneda destino --</option>
@@ -170,7 +158,7 @@ function App() {
             type="number"
             min="0"
             step="1"
-            value={inputAmount === 0 ? '' : inputAmount}
+            value={amount === 0 ? '' : amount}
             onChange={handleAmountChange}
             className="amount-field"
             placeholder="Ingresa un número entero"
@@ -183,13 +171,13 @@ function App() {
           </p>
         )}
         
-        {conversionResult > 0 && selectedCurrency1 && selectedCurrency2 && (
+        {result > 0 && fromCurrency && toCurrency && (
           <div className="conversion-result-text">
-            Resultado: <strong>{conversionResult.toFixed(2)} {selectedCurrency2}</strong>
+            Resultado: <strong>{result.toFixed(2)} {toCurrency}</strong>
           </div>
         )}
-          </div>
       </div>
+    </div>
   )
 }
 
