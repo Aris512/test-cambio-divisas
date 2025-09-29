@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 
+
 function App() {
   // Estados para manejar las monedas y las selecciones
   const [currencies, setCurrencies] = useState<string[]>([])
@@ -20,6 +21,8 @@ function App() {
       }
       
       const data = await response.json()
+      
+
       
       // Verificar que data.rates existe
       if (!data.rates) {
